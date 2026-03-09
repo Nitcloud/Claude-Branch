@@ -37,6 +37,10 @@ export class Session {
   private onStateChange: (state: SessionState) => void;
   /** Current streaming message being assembled */
   private currentStreamMessage: MessageModel | null = null;
+  /** Track known message UUIDs to prevent duplicate insertion.
+   *  claude.exe with --resume outputs historical messages through stdout,
+   *  which can duplicate messages already loaded via get_session_messages. */
+  private knownUuids = new Set<string>();
 
   constructor(
     channelId: string,
@@ -80,16 +84,12 @@ export class Session {
    */
   private processIncomingMessageSilent(cliMessage: CliOutput): void {
     switch (cliMessage.type) {
-      case "user": {
-        const model = createMessageModel(cliMessage as Parameters<typeof createMessageModel>[0]);
-        if (model) {
-          this.state.messages.push(model);
-        }
-        break;
-      }
+      case "user":
       case "assistant": {
         const model = createMessageModel(cliMessage as Parameters<typeof createMessageModel>[0]);
         if (model) {
+          if (this.knownUuids.has(model.uuid)) break; // deduplicate
+          this.knownUuids.add(model.uuid);
           this.state.messages.push(model);
         }
         break;
@@ -184,8 +184,9 @@ export class Session {
     switch (eventType) {
       case "message_start": {
         // Create a new message model for the streaming message
+        const uuid = streamMsg.id || generateUuid();
         this.currentStreamMessage = {
-          uuid: streamMsg.id || generateUuid(),
+          uuid,
           role: streamMsg.role as "assistant",
           content: streamMsg.content.map((sc) => ({
             index: sc.index,
@@ -196,6 +197,7 @@ export class Session {
           model: streamMsg.model,
           parentToolUseId: streamMsg.parentToolUseId,
         };
+        this.knownUuids.add(uuid);
         this.state.messages.push(this.currentStreamMessage);
         this.updateStatus("streaming");
         break;
@@ -255,15 +257,16 @@ export class Session {
   private handleCompleteAssistantMessage(raw: unknown): void {
     const model = createMessageModel(raw as Parameters<typeof createMessageModel>[0]);
     if (model) {
-      // Replace streaming message if it matches, or add new
+      // Replace streaming message if it matches, or deduplicate
       const existingIdx = this.state.messages.findIndex(
         (m) => m.uuid === model.uuid
       );
       if (existingIdx >= 0) {
         this.state.messages[existingIdx] = model;
-      } else {
+      } else if (!this.knownUuids.has(model.uuid)) {
         this.state.messages.push(model);
       }
+      this.knownUuids.add(model.uuid);
       this.notify();
     }
   }
@@ -271,6 +274,8 @@ export class Session {
   private handleUserMessage(raw: unknown): void {
     const model = createMessageModel(raw as Parameters<typeof createMessageModel>[0]);
     if (model) {
+      if (this.knownUuids.has(model.uuid)) return; // deduplicate
+      this.knownUuids.add(model.uuid);
       this.state.messages.push(model);
       this.notify();
     }
@@ -298,6 +303,7 @@ export class Session {
 
   reset(): void {
     this.state.messages = [];
+    this.knownUuids.clear();
     this.streamAssembler.reset();
     this.currentStreamMessage = null;
     this.updateStatus("idle");
