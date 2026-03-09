@@ -10,6 +10,143 @@ CodePilot Extension 是一个完整的 Claude Code 客户端实现，提供 **VS
 
 区别于原版 Claude Code VSCode 扩展，CodePilot 的核心创新是 **完整对话上下文保留**（无压缩截断）和 **Git 风格分支系统**。
 
+## UI 预览
+
+![CodePilot UI](img/ui.png)
+
+左侧为 Task/Branch/Turn 三级树导航，中间为 Git 风格的对话图，右侧为 ChatView 聊天界面。
+
+---
+
+## 快速开始
+
+### 前置要求
+
+- **Node.js** >= 20
+- **npm** >= 9
+- **claude.exe** — Anthropic Claude Code 原生二进制（通过 `npm install -g @anthropic-ai/claude-code` 安装，或从 VSCode Claude Code 扩展目录中获取）
+- **Git Bash** (Windows) — claude.exe 在 Windows 上依赖 Git Bash 执行 shell 命令
+
+### 安装与构建
+
+```bash
+cd extension
+npm install          # 安装依赖
+npm run build        # 构建所有 target (extension + webview + server)
+```
+
+仅构建独立服务器模式（不需要 VSCode）：
+
+```bash
+npm run build:server   # 仅构建 server + webview
+```
+
+### 启动独立服务器
+
+```bash
+npm start              # 构建 + 启动 (默认端口 3000)
+# 或者已构建后直接启动
+npm run server
+```
+
+启动参数：
+
+```bash
+node dist/server.js --port 3456 --cwd /path/to/project --binary /path/to/claude.exe
+```
+
+| 参数 | 环境变量 | 默认值 | 说明 |
+|------|----------|--------|------|
+| `--port` | `PORT` | 3000 | HTTP/WebSocket 端口 |
+| `--cwd` | `CLAUDE_CWD` | `process.cwd()` | claude.exe 工作目录 |
+| `--binary` | `CLAUDE_BINARY` | 自动搜索 | claude.exe 路径 |
+| `--host` | `HOST` | 127.0.0.1 | 监听地址 |
+
+启动成功后在浏览器打开 `http://127.0.0.1:3000` 即可使用。
+
+### 作为 VSCode 扩展使用
+
+1. 用 VSCode 打开 `extension/` 目录
+2. 按 `F5` 启动 Extension Development Host
+3. 在新窗口中按 `Ctrl+Shift+Escape` 打开 CodePilot 面板
+
+### 开发模式
+
+```bash
+npm run watch:server   # 监听 server + webview 文件变更，自动重新构建
+# 另一个终端
+npm run server         # 启动服务器
+```
+
+修改代码后刷新浏览器即可看到更新。
+
+---
+
+## 使用说明
+
+### 基本对话
+
+1. 启动服务器后打开浏览器
+2. 在右侧 ChatView 输入消息，按 Enter 发送
+3. AI 回复会实时流式显示
+4. 点击输入框左下角可切换模型、权限模式
+
+### 任务与分支管理
+
+- **创建任务**: 点击侧边栏 "Tasks" 标题右侧的 `+` 按钮
+- **创建分支**: 在图中右键某个 Turn 节点 → "Fork & Rewind"（从该点分叉出新分支）
+- **切换分支**: 在侧边栏点击不同的 Branch 名称
+- **查看 Turn**: 点击侧边栏的 Turn 条目，ChatView 会跳转到对应消息
+- **重命名**: 右键 Task 或 Branch → "Rename"
+- **删除**: 右键 → "Delete"（分支标记为 deleted，不会物理删除 JSONL 文件）
+
+### 合并分支
+
+1. 右键分支 → "Merge to Parent"，或右键某个 Turn → "Merge up to here"
+2. 选择合并范围（支持增量合并，不必一次性合并整个分支）
+3. 点击 "Generate AI Summary" 让 AI 生成合并总结
+4. 编辑总结文本 → 点击 "Merge"
+5. 总结会作为 assistant 消息注入到父分支末尾
+
+### 回退
+
+- 右键 Turn → "Rollback" — 将会话截断到该 Turn（不可逆）
+- 使用 "Fork & Rewind" 替代，可以在创建分支保留后续内容的同时回退
+
+### 导入会话
+
+- 点击侧边栏标题的 `↓` 按钮 → 选择已有的 Claude Code 会话导入到当前任务
+
+---
+
+## 注意事项
+
+### 环境配置
+
+- **Windows 用户必须配置 Git Bash 路径**: claude.exe 依赖 Git Bash 来执行 shell 命令。需要设置环境变量 `CLAUDE_CODE_GIT_BASH_PATH` 指向 `bash.exe`（例如 `D:\APP\Git\bin\bash.exe`），或确保 Git 在 PATH 中
+- **API Key**: 需要有效的 Anthropic API Key。通过 `ANTHROPIC_API_KEY` 环境变量设置，或在 claude.exe 中已登录
+- **CLAUDECODE 环境变量**: 如果系统中存在 `CLAUDECODE` 环境变量，必须删除它（不是设为空字符串），否则 claude.exe 的行为会异常
+
+### 已知限制
+
+1. **依赖 claude.exe**: 本项目不直接调用 Anthropic API，而是通过 claude.exe CLI 进行交互。claude.exe 的版本更新可能导致 stdin/stdout 协议变化
+2. **JSONL 文件大小**: 长对话的 JSONL 文件可能达到数 MB，图数据构建和历史回放会有延迟
+3. **内存占用**: 每个对话对应一个独立的 claude.exe 进程，多对话并行时内存和 CPU 占用较高
+4. **请求超时**: 前端 Connection 层的请求超时固定为 10 秒，AI 生成合并总结时可能超时（长分支内容多时）
+5. **Windows Only**: 当前仅在 Windows 11 上测试过。macOS/Linux 理论上可用但未充分验证
+
+### 数据安全
+
+- 所有对话数据存储在本地 `~/.claude/projects/` 目录下的 JSONL 文件中，不会上传到任何第三方服务
+- `.codepilot-meta.json` 存储任务和分支元数据，位于会话目录中
+- 删除分支时仅标记 `status: "deleted"`，JSONL 文件不会被物理删除。如需彻底清理，手动删除对应的 `.jsonl` 文件
+
+### 与原版 Claude Code 的共存
+
+- 本项目复用 claude.exe 的会话存储格式（JSONL），因此 CodePilot 创建的会话在 Claude Code CLI 中也可以 `--resume`
+- `.codepilot-meta.json` 是 CodePilot 独有的元数据文件，不影响原版 Claude Code 的正常使用
+- 建议不要同时在 CodePilot 和原版 Claude Code 中操作同一个会话，避免 JSONL 文件写入冲突
+
 ---
 
 ## 架构总览
