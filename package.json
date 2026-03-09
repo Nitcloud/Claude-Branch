@@ -1,0 +1,308 @@
+{
+  "name": "codepilot-claude",
+  "displayName": "CodePilot Claude",
+  "description": "Claude Code reproduction with full conversation history (no compaction truncation)",
+  "version": "0.1.0",
+  "publisher": "CodePilot",
+  "engines": {
+    "vscode": "^1.94.0"
+  },
+  "categories": [
+    "AI",
+    "Chat"
+  ],
+  "keywords": [
+    "claude",
+    "ai",
+    "mcp",
+    "agent"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onWebviewPanel:claudeVSCodePanel"
+  ],
+  "icon": "resources/claude-logo.png",
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "CodePilot Claude",
+      "properties": {
+        "claudeCode.selectedModel": {
+          "type": "string",
+          "default": "default",
+          "description": "The AI model for Claude Code."
+        },
+        "claudeCode.environmentVariables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ]
+          },
+          "default": [],
+          "description": "Environment variables to set when launching Claude."
+        },
+        "claudeCode.useTerminal": {
+          "type": "boolean",
+          "default": false,
+          "description": "Launch Claude in the terminal instead of the native UI."
+        },
+        "claudeCode.allowDangerouslySkipPermissions": {
+          "type": "boolean",
+          "description": "Allow bypass permissions mode."
+        },
+        "claudeCode.claudeProcessWrapper": {
+          "type": "string",
+          "description": "Executable path used to launch the Claude process."
+        },
+        "claudeCode.respectGitIgnore": {
+          "type": "boolean",
+          "default": true,
+          "description": "Respect .gitignore files when performing file searches."
+        },
+        "claudeCode.initialPermissionMode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "acceptEdits",
+            "plan",
+            "bypassPermissions"
+          ],
+          "default": "default",
+          "description": "Initial permission mode for new conversations."
+        },
+        "claudeCode.disableLoginPrompt": {
+          "type": "boolean",
+          "default": false,
+          "description": "Never prompt for login/authentication."
+        },
+        "claudeCode.autosave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically save files before Claude reads or writes them."
+        },
+        "claudeCode.useCtrlEnterToSend": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use Ctrl/Cmd+Enter to send prompts instead of Enter."
+        },
+        "claudeCode.preferredLocation": {
+          "type": "string",
+          "enum": [
+            "sidebar",
+            "panel"
+          ],
+          "default": "panel",
+          "description": "Where Claude opens by default."
+        },
+        "claudeCode.enableNewConversationShortcut": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use Cmd/Ctrl+N to start a new conversation when Claude is focused."
+        },
+        "claudeCode.hideOnboarding": {
+          "type": "boolean",
+          "default": false,
+          "description": "Hide the onboarding checklist."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "claude-vscode.editor.open",
+        "title": "Claude Code: Open in New Tab",
+        "icon": {
+          "light": "resources/claude-logo.svg",
+          "dark": "resources/claude-logo.svg"
+        }
+      },
+      {
+        "command": "claude-vscode.editor.openLast",
+        "title": "Claude Code: Open",
+        "icon": {
+          "light": "resources/claude-logo.svg",
+          "dark": "resources/claude-logo.svg"
+        }
+      },
+      {
+        "command": "claude-vscode.sidebar.open",
+        "title": "Claude Code: Open in Side Bar",
+        "icon": {
+          "light": "resources/claude-logo.svg",
+          "dark": "resources/claude-logo.svg"
+        }
+      },
+      {
+        "command": "claude-vscode.newConversation",
+        "title": "Claude Code: New Conversation"
+      },
+      {
+        "command": "claude-vscode.focus",
+        "title": "Claude Code: Focus input"
+      },
+      {
+        "command": "claude-vscode.blur",
+        "title": "Claude Code: Blur input"
+      },
+      {
+        "command": "claude-vscode.terminal.open",
+        "title": "Claude Code: Open in Terminal",
+        "icon": {
+          "light": "resources/claude-logo.svg",
+          "dark": "resources/claude-logo.svg"
+        }
+      },
+      {
+        "command": "claude-vscode.acceptProposedDiff",
+        "title": "Claude Code: Accept Proposed Changes",
+        "enablement": "claude-vscode.viewingProposedDiff",
+        "icon": "$(check)"
+      },
+      {
+        "command": "claude-vscode.rejectProposedDiff",
+        "title": "Claude Code: Reject Proposed Changes",
+        "enablement": "claude-vscode.viewingProposedDiff",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "claude-vscode.insertAtMention",
+        "title": "Claude Code: Insert @-Mention Reference"
+      },
+      {
+        "command": "claude-vscode.showLogs",
+        "title": "Claude Code: Show Logs"
+      },
+      {
+        "command": "claude-vscode.logout",
+        "title": "Claude Code: Logout"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "claude-vscode.insertAtMention",
+        "key": "alt+k",
+        "mac": "alt+k",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "claude-vscode.focus",
+        "key": "cmd+escape",
+        "mac": "cmd+escape",
+        "win": "ctrl+escape",
+        "linux": "ctrl+escape",
+        "when": "!config.claudeCode.useTerminal && editorTextFocus"
+      },
+      {
+        "command": "claude-vscode.blur",
+        "key": "cmd+escape",
+        "mac": "cmd+escape",
+        "win": "ctrl+escape",
+        "linux": "ctrl+escape",
+        "when": "!config.claudeCode.useTerminal && !editorTextFocus"
+      },
+      {
+        "command": "claude-vscode.editor.open",
+        "key": "cmd+shift+escape",
+        "mac": "cmd+shift+escape",
+        "win": "ctrl+shift+escape",
+        "linux": "ctrl+shift+escape",
+        "when": "!config.claudeCode.useTerminal"
+      },
+      {
+        "command": "claude-vscode.newConversation",
+        "key": "cmd+n",
+        "mac": "cmd+n",
+        "win": "ctrl+n",
+        "linux": "ctrl+n",
+        "when": "config.claudeCode.enableNewConversationShortcut && (activeWebviewPanelId == 'claudeVSCodePanel' || (claude-vscode.sideBarActive && !editorFocus && !panelFocus))"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "claude-sidebar",
+          "title": "Claude Code",
+          "icon": "resources/claude-logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "claude-sidebar": [
+        {
+          "type": "webview",
+          "id": "claudeVSCodeSidebar",
+          "name": "Claude Code"
+        }
+      ]
+    },
+    "menus": {
+      "editor/title": [
+        {
+          "command": "claude-vscode.acceptProposedDiff",
+          "when": "claude-vscode.viewingProposedDiff",
+          "group": "navigation"
+        },
+        {
+          "command": "claude-vscode.rejectProposedDiff",
+          "when": "claude-vscode.viewingProposedDiff",
+          "group": "navigation"
+        },
+        {
+          "command": "claude-vscode.editor.openLast",
+          "when": "!config.claudeCode.useTerminal",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "build:server": "node esbuild.config.mjs --server-only",
+    "watch": "node esbuild.config.mjs --watch",
+    "watch:server": "node esbuild.config.mjs --watch --server-only",
+    "start": "node esbuild.config.mjs --server-only && node dist/server.js",
+    "server": "node dist/server.js",
+    "lint": "tsc --noEmit",
+    "lint:server": "tsc --noEmit -p tsconfig.server.json"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/vscode": "^1.94.0",
+    "@types/ws": "^8.5.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.70.0",
+    "diff": "^5.2.0",
+    "dompurify": "^3.1.0",
+    "marked": "^17.0.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "rehype-highlight": "^7.0.0",
+    "rehype-stringify": "^10.0.0",
+    "remark": "^15.0.0",
+    "remark-gfm": "^4.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.0.0",
+    "unified": "^11.0.0",
+    "ws": "^8.16.0"
+  }
+}

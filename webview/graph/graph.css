@@ -1,0 +1,1001 @@
+/* ============================================================
+ * Branch Graph View — CSS aligned with vscode-git-graph
+ * Source: vscode-git-graph/web/styles/main.css
+ * ============================================================ */
+
+
+/* ── Main layout ── */
+
+.branch-graph-view {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.branch-graph-sidebar {
+  min-width: 140px;
+  max-width: 500px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.branch-graph-sidebar-resize {
+  width: 4px;
+  cursor: col-resize;
+  flex-shrink: 0;
+  background: transparent;
+  border-right: 1px solid rgba(128,128,128,0.5);
+}
+
+.branch-graph-sidebar-resize:hover {
+  background: var(--vscode-focusBorder, #007fd4);
+}
+
+.branch-graph-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.branch-graph-upper {
+  overflow: auto;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.branch-graph-divider {
+  height: 4px;
+  background: rgba(128,128,128,0.3);
+  cursor: row-resize;
+  flex-shrink: 0;
+}
+
+.branch-graph-divider:hover {
+  background: var(--vscode-focusBorder, #007fd4);
+}
+
+.branch-graph-lower {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ── Controls Bar (matches vscode-git-graph #controls) ── */
+
+.graph-controls {
+  display: block;
+  position: relative;
+  padding: 4px 60px 4px 0;
+  border-bottom: 1px solid rgba(128,128,128,0.5);
+  line-height: 32px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.graph-control-group {
+  display: inline-block;
+  white-space: nowrap;
+  margin: 0 10px;
+  cursor: pointer;
+}
+
+.graph-control-label {
+  font-size: 13px;
+  font-weight: 700;
+  margin-right: 3px;
+}
+
+/* ── Custom Dropdown (ported from vscode-git-graph/web/styles/dropdown.css) ── */
+
+.dropdown {
+  display: none;
+  position: relative;
+  font-size: 13px;
+  vertical-align: top;
+  margin-top: 3px;
+  font-weight: normal;
+  text-align: left;
+}
+
+.dropdown.loaded {
+  display: inline-block;
+}
+
+.dropdownCurrentValue {
+  background-color: rgba(128,128,128,0.1);
+  border: 1px solid rgba(128,128,128,0.5);
+  border-radius: 6px;
+  box-sizing: border-box;
+  height: 26px;
+  line-height: 24px;
+  padding-left: 10px;
+  padding-right: 20px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  max-width: 30vw;
+}
+
+.dropdownCurrentValue:hover {
+  background-color: rgba(128,128,128,0.2);
+}
+
+.dropdownCurrentValue:after {
+  position: absolute;
+  content: "";
+  top: 11px;
+  right: 7px;
+  width: 0;
+  height: 0;
+  border: 4px solid transparent;
+  border-color: var(--vscode-editor-foreground) transparent transparent transparent;
+}
+
+.dropdown.dropdownOpen .dropdownCurrentValue:after {
+  border-color: transparent transparent var(--vscode-editor-foreground) transparent;
+  top: 7px;
+}
+
+.dropdownMenu {
+  position: absolute;
+  background-color: var(--vscode-menu-background, #252526);
+  color: var(--vscode-menu-foreground, #cccccc);
+  top: 100%;
+  left: 0;
+  z-index: 19;
+  line-height: 20px;
+  border: 1px solid rgba(128,128,128,0.5);
+  border-radius: 0 0 6px 6px;
+  overflow-x: hidden;
+  margin-top: -1px;
+  white-space: nowrap;
+  min-width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dropdownOption {
+  position: relative;
+  cursor: pointer;
+  padding: 4px 10px;
+  -webkit-user-select: none;
+  user-select: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dropdown.multi .dropdownOption {
+  padding-left: 30px;
+}
+
+.dropdownOption.selected {
+  background-color: rgba(128,128,128,0.15);
+}
+
+.dropdownOption:hover {
+  background-color: var(--vscode-menu-selectionBackground, #094771);
+  color: var(--vscode-menu-selectionForeground, #ffffff);
+}
+
+.dropdownOptionHint {
+  opacity: 0.6;
+  margin-left: 8px;
+}
+
+.dropdownOptionMultiSelected {
+  position: absolute;
+  width: 12px;
+  height: 16px;
+  top: 7px;
+  left: 10px;
+}
+
+.dropdownOptionMultiSelected svg {
+  fill: var(--vscode-menu-foreground, #cccccc);
+  opacity: 0.7;
+}
+
+.dropdownOption:hover .dropdownOptionMultiSelected svg {
+  fill: var(--vscode-menu-selectionForeground, #ffffff);
+  opacity: 0.85;
+}
+
+.dropdown.dropdownOpen .dropdownCurrentValue {
+  border-radius: 6px 6px 0 0;
+}
+
+.dropdownFilter {
+  position: relative;
+  padding: 3px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.dropdownFilterInput {
+  width: 100%;
+  box-sizing: border-box;
+  background: none;
+  border: 1px solid rgba(128,128,128,0.5);
+  outline: none;
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 13px;
+  line-height: 17px;
+  color: var(--vscode-menu-foreground, #cccccc);
+}
+
+.dropdownNoResults {
+  position: relative;
+  padding: 4px 10px;
+  -webkit-user-select: none;
+  user-select: none;
+  font-style: italic;
+  opacity: 0.6;
+}
+
+.graph-control-refresh {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  background: transparent;
+  border: none;
+  color: var(--vscode-editor-foreground);
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0.8;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.graph-control-refresh:hover {
+  opacity: 1;
+}
+
+
+/* ── Graph Content (SVG + Table overlay, matches #content) ── */
+
+.graph-content {
+  position: relative;
+}
+
+
+/* ── Commit Graph SVG (matches #commitGraph) ── */
+
+.graph-svg-overlay {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.graph-svg-overlay circle {
+  pointer-events: all;
+}
+
+.graph-svg-overlay circle.current {
+  fill: var(--vscode-editor-background);
+  stroke-width: 2;
+}
+
+.graph-svg-overlay circle:not(.current) {
+  stroke: var(--vscode-editor-background);
+  stroke-width: 1;
+  stroke-opacity: 0.75;
+}
+
+.graph-svg-overlay path.shadow {
+  fill: none;
+  stroke: var(--vscode-editor-background);
+  stroke-opacity: 0.75;
+  stroke-width: 4;
+}
+
+.graph-svg-overlay path.line {
+  fill: none;
+  stroke-width: 2;
+}
+
+.graph-svg-overlay circle:hover {
+  filter: brightness(1.3);
+}
+
+
+/* ── Commit Table (matches #commitTable) ── */
+
+.graph-table-wrapper {
+  z-index: 1;
+}
+
+.graph-table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.graph-table-wrapper table,
+.graph-table-wrapper tbody,
+.graph-table-wrapper tr,
+.graph-table-wrapper th,
+.graph-table-wrapper td {
+  padding: 0;
+  margin: 0;
+}
+
+.graph-table-wrapper th,
+.graph-table-wrapper td {
+  white-space: nowrap;
+  font-size: 13px;
+  cursor: default;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.graph-table-wrapper td {
+  line-height: 24px;
+  padding: 0 4px;
+}
+
+.graph-table-wrapper th {
+  border-bottom: 1px solid rgba(128,128,128,0.5);
+  line-height: 18px;
+  padding: 6px 12px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Auto-layout: description column fills remaining width */
+.graph-table-wrapper td:nth-child(2),
+.graph-table-wrapper th:nth-child(2) {
+  width: 100%;
+  max-width: 0;
+}
+
+.graph-table-wrapper tr.commit td {
+  cursor: pointer;
+}
+
+
+/* ── Commit row states (matches vscode-git-graph hover/selection) ── */
+
+.graph-table-wrapper tr.commit:hover,
+.graph-table-wrapper tr.commit.contextMenuActive,
+.graph-table-wrapper tr.commit.graphVertexActive {
+  background-color: rgba(128,128,128,0.15);
+}
+
+.graph-table-wrapper tr.commit.highlighted {
+  background-color: rgba(128,128,128,0.25);
+}
+
+.graph-table-wrapper tr.commit.highlighted:hover {
+  background-color: rgba(128,128,128,0.35);
+}
+
+.graph-table-wrapper tr.commit.current span.description .text {
+  font-weight: bold;
+}
+
+
+/* ── Description column (matches commit description flex layout) ── */
+
+.graph-table-wrapper tr.commit span.description {
+  display: flex;
+}
+
+.graph-table-wrapper tr.commit span.description .gitRef {
+  flex-shrink: 0;
+}
+
+.graph-table-wrapper tr.commit span.description .text {
+  display: inline-block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  flex-grow: 1;
+}
+
+
+/* ── Date and Msg columns ── */
+
+.dateCol {
+  max-width: 100px;
+  text-align: right;
+}
+
+.msgCol {
+  max-width: 60px;
+  text-align: right;
+  font-family: monospace;
+}
+
+@media screen and (max-width: 700px) {
+  .dateCol { max-width: 80px; }
+  .msgCol { max-width: 50px; }
+}
+
+
+/* ── Ref labels (matches .gitRef) ── */
+
+.gitRef {
+  display: inline-block;
+  height: 18px;
+  line-height: 18px;
+  margin-top: 2px;
+  margin-right: 5px;
+  background-color: rgba(128,128,128,0.15);
+  border-radius: 5px;
+  border: 1px solid rgba(128,128,128,0.75);
+  vertical-align: top;
+  font-size: 12px;
+  cursor: default;
+  overflow: hidden;
+}
+
+.gitRef.active {
+  font-weight: bold;
+}
+
+.gitRefName {
+  display: inline-block;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 5px;
+}
+
+.gitRef.fork {
+  border-color: #2ca02c;
+}
+
+.gitRef.merge {
+  border-color: #ff7f0e;
+}
+
+
+/* ── Graph loading/empty ── */
+
+.graph-loading,
+.graph-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.8));
+  font-size: 14px;
+}
+
+
+/* ── Sidebar Title Header ── */
+
+.sidebar-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  height: 34px;
+  border-bottom: 1px solid rgba(128,128,128,0.5);
+  flex-shrink: 0;
+}
+
+.sidebar-title-text {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.8));
+}
+
+.sidebar-title-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.sidebar-title-btn {
+  background: transparent;
+  border: none;
+  color: var(--vscode-editor-foreground, #d4d4d4);
+  font-size: 16px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 3px;
+  opacity: 0.7;
+}
+
+.sidebar-title-btn:hover {
+  background-color: rgba(128,128,128,0.2);
+  opacity: 1;
+}
+
+
+/* ── Sidebar Tree ── */
+
+.sidebar-tree {
+  padding: 4px 0;
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  padding: 3px 8px;
+  cursor: pointer;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.tree-row:hover {
+  background-color: rgba(128,128,128,0.15);
+}
+
+.tree-row.active {
+  background-color: rgba(128,128,128,0.25);
+}
+
+.tree-task-row {
+  font-weight: 600;
+}
+
+.tree-branch-row {
+  padding-left: 20px;
+}
+
+.tree-turn-row {
+  padding-left: 36px;
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.8));
+}
+
+.tree-turn-row:hover {
+  color: var(--vscode-editor-foreground);
+}
+
+.tree-arrow {
+  display: inline-block;
+  width: 12px;
+  font-size: 8px;
+  transition: transform 0.15s;
+}
+
+.tree-arrow.expanded {
+  transform: rotate(90deg);
+}
+
+.tree-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-turn-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-badge {
+  font-size: 9px;
+  padding: 0 3px;
+  border-radius: 2px;
+  margin-left: 4px;
+}
+
+.tree-badge-merged {
+  background: rgba(44,160,44,0.2);
+  color: #2ca02c;
+}
+
+.tree-badge-deleted {
+  background: rgba(217,83,79,0.2);
+  color: #d9534f;
+}
+
+/* (tree-actions removed — buttons moved to sidebar-title header) */
+
+.tree-rename-input {
+  flex: 1;
+  background: var(--vscode-input-background, #3c3c3c);
+  color: var(--vscode-input-foreground, #cccccc);
+  border: 1px solid var(--vscode-focusBorder, #007fd4);
+  border-radius: 2px;
+  padding: 1px 4px;
+  font-size: 12px;
+  outline: none;
+}
+
+
+/* ── Context Menu (matches vscode-git-graph .contextMenu) ── */
+
+.contextMenu {
+  display: block;
+  position: fixed;
+  background-color: var(--vscode-menu-background, #252526);
+  box-shadow: 0 1px 4px 1px var(--vscode-widget-shadow, rgba(0,0,0,0.3));
+  color: var(--vscode-menu-foreground, #cccccc);
+  list-style-type: none;
+  margin: 0;
+  padding: 4px 0;
+  z-index: 10;
+  min-width: 120px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.contextMenuItem {
+  padding: 6px 20px;
+  cursor: default;
+  font-size: 13px;
+}
+
+.contextMenuItem:hover {
+  background-color: var(--vscode-menu-selectionBackground, #094771);
+  color: var(--vscode-menu-selectionForeground, #ffffff);
+}
+
+.contextMenuDivider {
+  margin: 4px 10px;
+  border-top: 1px solid var(--vscode-menu-separatorBackground, rgba(128,128,128,0.5));
+  opacity: 0.5;
+}
+
+.contextMenuItem.danger {
+  color: #d9534f;
+}
+
+
+/* ── Empty State ── */
+
+.graph-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+}
+
+.graph-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.graph-empty-hint {
+  font-size: 13px;
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.8));
+  max-width: 400px;
+}
+
+.graph-empty-hint p {
+  margin: 0 0 12px;
+}
+
+.graph-empty-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+
+/* ── Action Buttons (roundedBtn style from vscode-git-graph) ── */
+
+.graph-action-btn {
+  display: inline-block;
+  padding: 6px 14px;
+  background-color: rgba(128,128,128,0.1);
+  border: 1px solid rgba(128,128,128,0.5);
+  border-radius: 14px;
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--vscode-editor-foreground);
+}
+
+.graph-action-btn:hover {
+  background-color: rgba(128,128,128,0.2);
+}
+
+.graph-action-primary {
+  background-color: var(--vscode-button-background, #0e639c);
+  color: var(--vscode-button-foreground, #ffffff);
+  border-color: var(--vscode-button-background, #0e639c);
+}
+
+.graph-action-primary:hover {
+  background-color: var(--vscode-button-hoverBackground, #1177bb);
+}
+
+.graph-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* ── Merge Dialog ── */
+
+.merge-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.merge-dialog {
+  background: var(--vscode-editor-background, #1e1e1e);
+  border: 1px solid rgba(128,128,128,0.5);
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.merge-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.merge-dialog-header h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.merge-dialog-close {
+  background: transparent;
+  border: none;
+  color: var(--vscode-editor-foreground);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.merge-dialog-loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.8));
+}
+
+.merge-dialog-info {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.8));
+  margin-bottom: 12px;
+}
+
+.merge-dialog-section {
+  margin-bottom: 12px;
+}
+
+.merge-dialog-section label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.8));
+}
+
+.merge-dialog-textarea {
+  width: 100%;
+  background: var(--vscode-input-background, #3c3c3c);
+  color: var(--vscode-input-foreground, #cccccc);
+  border: 1px solid rgba(128,128,128,0.5);
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 12px;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.merge-dialog-textarea:focus {
+  border-color: var(--vscode-focusBorder, #007fd4);
+}
+
+.merge-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.merge-dialog-btn {
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+}
+
+.merge-dialog-btn-cancel {
+  background: transparent;
+  color: var(--vscode-editor-foreground);
+  border: 1px solid rgba(128,128,128,0.5);
+}
+
+.merge-dialog-btn-merge {
+  background: var(--vscode-button-background, #0e639c);
+  color: var(--vscode-button-foreground, #ffffff);
+}
+
+.merge-dialog-btn-merge:hover {
+  background: var(--vscode-button-hoverBackground, #1177bb);
+}
+
+.merge-dialog-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.merge-dialog-history {
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.merge-dialog-history label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.8));
+}
+
+.merge-dialog-history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 8px;
+  background: rgba(128,128,128,0.1);
+  border-radius: 3px;
+  margin-bottom: 2px;
+}
+
+.merge-dialog-history-date {
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.6));
+}
+
+.merge-dialog-range {
+  margin-bottom: 12px;
+}
+
+.merge-dialog-range label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.8));
+}
+
+.merge-dialog-range-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.merge-dialog-range-row select {
+  background: var(--vscode-input-background, #3c3c3c);
+  color: var(--vscode-input-foreground, #cccccc);
+  border: 1px solid var(--vscode-input-border, rgba(128,128,128,0.5));
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.merge-dialog-btn-generate {
+  background: var(--vscode-button-secondaryBackground, #3a3d41);
+  color: var(--vscode-button-secondaryForeground, #cccccc);
+  width: 100%;
+}
+
+.merge-dialog-btn-generate:hover:not(:disabled) {
+  background: var(--vscode-button-secondaryHoverBackground, #45494e);
+}
+
+.merge-dialog-error {
+  color: var(--vscode-errorForeground, #f48771);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+
+/* ── Import Session Dialog ── */
+
+.import-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.8));
+  font-size: 13px;
+}
+
+.import-session-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.import-session-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(128,128,128,0.2);
+}
+
+.import-session-item:last-child {
+  border-bottom: none;
+}
+
+.import-session-item:hover {
+  background-color: rgba(128,128,128,0.15);
+}
+
+.import-session-info {
+  flex: 1;
+  min-width: 0;
+  margin-right: 12px;
+}
+
+.import-session-title {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.import-session-meta {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground, rgba(128,128,128,0.8));
+  margin-top: 2px;
+}
+
+
+/* ── Sidebar toggle button (in App chat mode) ── */
+
+.sidebar-graph-toggle {
+  padding: 8px 12px;
+  margin: 8px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--vscode-textLink-foreground, #3794ff);
+  border: 1px solid rgba(128,128,128,0.5);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.sidebar-graph-toggle:hover {
+  background-color: rgba(128,128,128,0.15);
+}
+
+
+/* ── General user-select ── */
+
+.graph-svg-overlay,
+.graph-table-wrapper th,
+.graph-table-wrapper td,
+.gitRef {
+  -webkit-user-select: none;
+  user-select: none;
+}
